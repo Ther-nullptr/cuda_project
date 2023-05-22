@@ -25,8 +25,6 @@ cuda_opt: matrix_multiplication_opt.o matrix_multiplication_host.o util.o
 matrix_multiplication_opt.o: matrix_multiplication_opt.cu
 	$(NVCC) -c matrix_multiplication_opt.cu
 
-
-
 matrix_multiplication_host.o: matrix_multiplication_host.cc matrix_multiplication.h util.h
 	$(NVCC) -c matrix_multiplication_host.cc util.o
 

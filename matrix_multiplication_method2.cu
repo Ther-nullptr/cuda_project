@@ -3,7 +3,7 @@
 #include "matrix_multiplication.h"
 #include "util.h"
 
-#define TILE_SIZE 64
+#define TILE_SIZE 8
 
 
 __global__
@@ -20,13 +20,8 @@ void d_matrix_multiplication(Matrix C, Matrix A, Matrix B) {
 
     // Initialize Csum, which will be accumulated later 
     /*******************TODO*******************/
-    for (int i = 0; i < TILE_SIZE; i++)
-    {
-        for (int j = 0; j < TILE_SIZE; j++)
-        {
-            Csum[i][j] = 0;
-        }
-    }
+    // use library function memset to initialize Csum
+    memset(Csum, 0, sizeof(Csum));
     
     int a_vec[TILE_SIZE];
     int b_vec[TILE_SIZE];
