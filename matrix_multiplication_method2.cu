@@ -3,7 +3,7 @@
 #include "matrix_multiplication.h"
 #include "util.h"
 
-#define TILE_SIZE 2
+#define TILE_SIZE 64
 
 
 __global__
@@ -17,30 +17,52 @@ void d_matrix_multiplication(Matrix C, Matrix A, Matrix B) {
     int tile_col = idx_x * TILE_SIZE;
 
     int Csum[TILE_SIZE][TILE_SIZE];
-    //Initialize Csum, which will be accumulated later 
-    /*******************TODO*******************/
 
+    // Initialize Csum, which will be accumulated later 
+    /*******************TODO*******************/
+    for (int i = 0; i < TILE_SIZE; i++)
+    {
+        for (int j = 0; j < TILE_SIZE; j++)
+        {
+            Csum[i][j] = 0;
+        }
+    }
     
     int a_vec[TILE_SIZE];
     int b_vec[TILE_SIZE];
 
     for (int k = 0; k < A.width; k++)
     {
-        //Get the corresponding elements from A and B
-        //Note: use A.elements to get the elements from A. So does B. See matrix_multiplication.h
+        // Get the corresponding elements from A and B
+        // Note: use A.elements to get the elements from A. So does B. See matrix_multiplication.h
         /*******************TODO*******************/
+        for (int i = 0; i < TILE_SIZE; i++)
+        {
+            a_vec[i] = A.elements[(tile_row + i) * A.width + k];
+            b_vec[i] = B.elements[k * B.width + (tile_col + i)];
+        }
 
 
-        //Accumulate Csum
+        // Accumulate Csum
         /*******************TODO*******************/
-
-          
+        for (int i = 0; i < TILE_SIZE; i++)
+        {
+            for (int j = 0; j < TILE_SIZE; j++)
+            {
+                Csum[i][j] += a_vec[i] * b_vec[j];
+            }
+        } 
     }
 
-    //Set the values of Csum to the corresponding tile of C
+    // Set the values of Csum to the corresponding tile of C
     /*******************TODO*******************/
-
-           
+    for (int i = 0; i < TILE_SIZE; i++)
+    {
+        for (int j = 0; j < TILE_SIZE; j++)
+        {
+            C.elements[(tile_row + i) * C.width + (tile_col + j)] = Csum[i][j];
+        }
+    }
 }
 
 

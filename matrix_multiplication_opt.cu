@@ -119,13 +119,13 @@ void MatMul(const Matrix A, const Matrix B, Matrix C)
 
         // Use GetSubMatrix function to get sub-matrix Asub of A
         /*******************TODO*******************/
-        
 
+        Matrix Asub = GetSubMatrix(A, blockRow, m);
 
         // Use GetSubMatrix function to get sub-matrix Bsub of B
         /*******************TODO*******************/ 
 
-
+        Matrix Bsub = GetSubMatrix(B, m, blockCol);
 
         // Shared memory used to store Asub and Bsub respectively
         __shared__ int As[BLOCK_SIZE][BLOCK_SIZE];
@@ -136,7 +136,8 @@ void MatMul(const Matrix A, const Matrix B, Matrix C)
         // You can use GetElement function.
         /*******************TODO*******************/
 
-
+        As[row][col] = GetElement(Asub, row, col);
+        Bs[row][col] = GetElement(Bsub, row, col);
 
         // Synchronize to make sure the sub-matrices are loaded
         // before starting the computation
@@ -146,8 +147,10 @@ void MatMul(const Matrix A, const Matrix B, Matrix C)
         // by accumulating results into Cvalue
         /*******************TODO*******************/
 
-
-
+        for (int e = 0; e < BLOCK_SIZE; ++e)
+        {
+            Cvalue += As[row][e] * Bs[e][col];
+        }
 
         // Synchronize to make sure that the preceding
         // computation is done before loading two new
@@ -159,9 +162,7 @@ void MatMul(const Matrix A, const Matrix B, Matrix C)
     // Each thread writes one element
     // You can use SetElement function.
     /*******************TODO*******************/
-
-
-
+    SetElement(Csub, row, col, Cvalue);
 }
 
 int main() {

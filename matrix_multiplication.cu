@@ -9,14 +9,16 @@ void d_matrix_multiplication(Matrix C, Matrix A, Matrix B) {
     
     int idx_x = blockDim.x * blockIdx.x + threadIdx.x;
     int idx_y = blockDim.y * blockIdx.y + threadIdx.y;
-    
-      
 
 	//Note: use A.elements[] to get the elements from A. So does B. 
 	//You can see the definitions in matrix_multiplication.h
 	/*******************TODO*******************/
 
-    
+    int sum = 0;
+    for (int i = 0; i < A.width; i++) {
+        sum += A.elements[idx_y * A.width + i] * B.elements[i * B.width + idx_x];
+    }
+    C.elements[idx_y * C.width + idx_x] = sum;
 }
 
 void matrix_multiplication(Matrix &C, Matrix A, Matrix B) {
@@ -53,6 +55,10 @@ void matrix_multiplication(Matrix &C, Matrix A, Matrix B) {
     // Launch CUDA Kernel 
     dim3 blockDim(8, 8);  
     dim3 gridDim(d_C.width / blockDim.x, d_C.height / blockDim.y);
+
+    printf("blockDim: %d, %d\n", blockDim.x, blockDim.y);
+    printf("gridDim: %d, %d\n", gridDim.x, gridDim.y);
+
     d_matrix_multiplication<<<gridDim, blockDim>>>(d_C, d_A, d_B);
 
     cudaMemcpy(C.elements, d_C.elements, size, cudaMemcpyDeviceToHost);
