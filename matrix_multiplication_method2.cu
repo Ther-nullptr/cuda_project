@@ -37,7 +37,6 @@ void d_matrix_multiplication(Matrix C, Matrix A, Matrix B) {
             b_vec[i] = B.elements[k * B.width + (tile_col + i)];
         }
 
-
         // Accumulate Csum
         /*******************TODO*******************/
         for (int i = 0; i < TILE_SIZE; i++)
