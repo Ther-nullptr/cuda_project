@@ -1,0 +1,5 @@
+*.o
+matrix_multiplication
+matrix_multiplication_host
+matrix_multiplication_method2
+matrix_multiplication_opt
