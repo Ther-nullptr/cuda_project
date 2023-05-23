@@ -65,16 +65,26 @@ for (int i = 0; i < TILE_SIZE; i++)
 }
 ```
 
-运行结果如下：
+运行结果如下(`TILE_SIZE=2`)：
 
-
+![image.png](https://s2.loli.net/2023/05/23/JwB6jAzhTfyREo9.png)
 
 改变`TILE_SIZE`的大小，并对运行时间进行统计：
 
 | tile size | time(ms) |
 | --------- | -------- |
-|           |          |
+|     1     | 3.282611 |
+|     2     | 2.271091 |
+|     4     | 2.107053 |
+|     8     | 2.077536 |
+|    16     | 7.368474 |
+|    32     | 25.815271|
+|    64     | 83.601498|
 
+随`TILE_SIZE`的增加，运行时间先减小后增大（在8左右达到最小值，随后急剧增大）。
+
+1. 注意到此处A和B均存储在global memory中，访存开销较大。当tile size从1增加到8时，对A中特定行/B中特定列的访存数减小，计算密度（MACS操作的数目与访存操作的比例）增大；
+2. 考虑到每一个warp中含有32个线程，最多含有256个向量寄存器，其中每个寄存器可以存放32个32位元素，均摊在每一个线程上，最多能有256个元素能被存放于寄存器中。而当tile size大于16时，光`C_sum`一项中就含有256个32位int元素，多余的元素只能存放在L1 cache中，造成较大的开销。此外寄存器使用率接近100%时，可能会造成active warp数减小、bank conflict等。
 
 ## 3. Optimization using shared memory
 
@@ -106,12 +116,25 @@ __syncthreads();
 SetElement(Csub, row, col, Cvalue);
 ```
 
-运行结果如下：
+运行结果如下(`TILE_SIZE=16`)：
 
-
+![image.png](https://s2.loli.net/2023/05/23/dUXTZPh62fRVj1p.png)
 
 改变`TILE_SIZE`的大小，并对运行时间进行统计：
 
 | tile size | time(ms) |
 | --------- | -------- |
-|           |          |
+|     1     | 62.395489|
+|     2     | 10.850624|
+|     4     | 2.765997 |
+|     8     | 2.107232 |
+|    16     | 1.849939 |
+|    32     | 1.928793 |
+
+首先，引入shared memory之后，每一个thread无需像上一种方法那样，维护自己的`C_sum`数组，这样寄存器的使用状况得到了缓解；当tile size增大时，数据的复用性增强，只要不超过线程块所支持的最大线程数，执行时间就会一直减小。
+
+## Reference
+
+[^1]: [Achieved Occupancy](https://docs.nvidia.com/gameworks/content/developertools/desktop/analysis/report/cudaexperiments/kernellevel/achievedoccupancy.htm)
+
+[^2]: [CUDA 矩阵乘法终极优化指南](https://zhuanlan.zhihu.com/p/410278370)
